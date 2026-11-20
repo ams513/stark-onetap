@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; form-action 'none'">
+<title>Stark One-Tap</title>
+<style>
+:root{--bg:#0d1b1e;--surface:#13262b;--line:#24404a;--text:#ecf3f0;--muted:#9fb7b1;--teal:#6fe3c8;--peach:#ffd2b0;--coral:#ff8a65;--ok:#6fe3c8;--warn:#ffd27a;--bad:#ff8a8a;
+--display:Bahnschrift,"Segoe UI",system-ui,sans-serif;--body:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font:16px/1.45 var(--body)}
+main{max-width:640px;margin:0 auto;padding:max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 48px max(16px,env(safe-area-inset-left))}
+h1{font:600 26px var(--display);margin:8px 0 2px;letter-spacing:.01em}
+.k{color:var(--teal);font:600 11px var(--display);letter-spacing:.28em}
+.sub{color:var(--muted);font-size:14px;margin:0 0 16px}
+section{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0}
+h2{font:600 16px var(--display);margin:0 0 10px;color:var(--peach)}
+label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
+textarea,input,select{width:100%;background:#0b1719;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px;font:15px var(--body)}
+textarea{min-height:110px;resize:vertical}
+button,.btn{appearance:none;border:0;border-radius:12px;padding:12px 16px;font:600 15px var(--body);cursor:pointer;background:var(--line);color:var(--text);text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+button:focus-visible,.btn:focus-visible,textarea:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+.primary{background:var(--coral);color:#1a0f0b}
+.go{background:var(--teal);color:#06231d;width:100%;padding:16px;font-size:17px}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.row>*{flex:1 1 auto}
+.stats{display:flex;gap:8px;flex-wrap:wrap;font-variant-numeric:tabular-nums}
+.stat{flex:1 1 90px;background:#0b1719;border:1px solid var(--line);border-radius:12px;padding:8px 10px}
+.stat b{display:block;font:600 20px var(--display)}
+.stat span{font-size:12px;color:var(--muted)}
+.card{border:1.5px solid var(--teal);border-radius:16px;padding:16px;background:#0f2226}
+.who{font:600 22px var(--display)}
+.num{color:var(--muted);font-variant-numeric:tabular-nums}
+.preview{white-space:pre-wrap;background:#0b1719;border-radius:12px;padding:12px;margin:12px 0;font-size:15px}
+.note{font-size:13px;color:var(--muted)}
+.warn{color:var(--warn)}
+.list{max-height:320px;overflow:auto;border-top:1px solid var(--line);margin-top:8px}
+.li{display:flex;justify-content:space-between;gap:8px;padding:8px 2px;border-bottom:1px solid var(--line);font-size:14px}
+.pill{font-size:12px;padding:2px 8px;border-radius:99px;border:1px solid var(--line);white-space:nowrap}
+.pill.sent{color:var(--ok);border-color:var(--ok)} .pill.out{color:var(--bad);border-color:var(--bad)} .pill.skip{color:var(--warn);border-color:var(--warn)}
+[hidden]{display:none!important}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+  <div class="k">PROTOCOL STARK</div>
+  <h1>One-Tap Sender</h1>
+  <p class="sub">Personal texts, one person at a time. You press Send in Messages yourself. Your contacts stay on this phone: nothing is uploaded.</p>
+
+  <section id="step1">
+    <h2>1 · Contacts</h2>
+    <p class="note">Import a contacts file (.vcf from iCloud.com → Contacts → select all → Export vCard, or a .csv), or paste lines like <b>Maria Lopez, +1 555 123 4567</b>.</p>
+    <input type="file" id="file" accept=".vcf,.csv,text/vcard,text/csv,text/plain">
+    <label for="paste">Or paste contacts</label>
+    <textarea id="paste" placeholder="Name, phone number (one per line)"></textarea>
+    <div class="row" style="margin-top:8px"><button class="primary" id="addPaste">Add contacts</button><button id="clearAll">Clear all</button></div>
+    <p class="note" id="importMsg" role="status"></p>
+  </section>
+
+  <section id="step2">
+    <h2>2 · Message</h2>
+    <label for="tpl">Template</label>
+    <select id="tpl">
+      <option value="earn">Earn with me (25% commission)</option>
+      <option value="early">Early believers (interest only)</option>
+      <option value="custom">My own message</option>
+    </select>
+    <label for="msg">Message ({name} becomes their first name)</label>
+    <textarea id="msg" style="min-height:180px"></textarea>
+    <p class="note">{name} is replaced with each person's first name, or "there" if unknown.</p>
+  </section>
+
+  <section id="step3">
+    <h2>3 · Send</h2>
+    <div class="stats">
+      <div class="stat"><b id="sTotal">0</b><span>contacts</span></div>
+      <div class="stat"><b id="sLeft">0</b><span>to go</span></div>
+      <div class="stat"><b id="sSent">0</b><span>sent</span></div>
+      <div class="stat"><b id="sToday">0</b><span>sent today</span></div>
+    </div>
+    <p class="note warn" id="quiet" hidden>It's late (9 PM–8 AM). Messages are kinder in the daytime.</p>
+    <div class="card" id="card" hidden style="margin-top:12px">
+      <div class="who" id="cName"></div>
+      <div class="num" id="cNum"></div>
+      <div class="preview" id="cPrev"></div>
+      <a class="btn go" id="openSms" href="#">Open in Messages</a>
+      <div class="row" style="margin-top:10px">
+        <button id="markSent">✓ I sent it</button>
+        <button id="skip">Skip</button>
+        <button id="optout">Don't text again</button>
+      </div>
+      <p class="note">Tap <b>Open in Messages</b>, press Send, come back here and tap <b>✓ I sent it</b>.</p>
+    </div>
+    <p class="note" id="done" hidden>Everyone on your list has been handled. 🎉</p>
+  </section>
+
+  <section>
+    <h2>Your list</h2>
+    <label for="q">Search</label>
+    <input id="q" placeholder="Name or number">
+    <div class="list" id="list"></div>
+    <div class="row" style="margin-top:10px"><button id="export">Copy log (CSV)</button><button id="resetSkips">Bring back skipped</button></div>
+    <p class="note" id="exportMsg" role="status"></p>
+  </section>
+
+  <p class="note">Send only to people you know, one at a time. Respect anyone who asks you to stop: tap <b>Don't text again</b> and they're never shown again.</p>
+</main>
+<script>
+(() => {
+'use strict';
+const TPL = {
+  earn: "Hi {name}, I wanted to share something I've been working on. I recently launched a software company, Protocol Stark. We make tools people buy once and keep, for clinics, contractors, schools and families.\n\nI'm looking for a few people to help spread the word. If someone buys through your link, you earn 25% of the sale. It's free to join and there's no obligation.\n\nIf you're interested, reply and I'll send you the details.",
+  early: "Hi {name}, I wanted to share something I've been working on. I recently launched a software company, Protocol Stark, and our products are now on sale worldwide.\n\nI'm in the process of forming it as a corporation. When that's done, I'll be offering a small number of people I know the chance to become early owners. There's nothing to decide now.\n\nIf you'd like to hear more when it's ready, just reply and I'll keep you posted.",
+  custom: "Hi {name}, "
+};
+const KEY = 'stark_onetap_v1';
+const $ = id => document.getElementById(id);
+let S = {contacts: [], tpl: 'earn', msg: TPL.earn, log: []};
+try { const s = JSON.parse(localStorage.getItem(KEY) || 'null'); if (s && Array.isArray(s.contacts)) S = Object.assign(S, s); } catch (e) {}
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+
+const normPhone = p => { let d = String(p || '').replace(/[^\d+]/g, ''); if (!d) return ''; if (d[0] !== '+') { d = d.replace(/\D/g, ''); if (d.length === 10) d = '+1' + d; else if (d.length === 11 && d[0] === '1') d = '+' + d; else d = '+' + d; } return d.length >= 8 ? d : ''; };
+const first = n => { const t = String(n || '').trim().split(/\s+/)[0] || ''; return /^[A-Za-zÀ-ÿ'’-]{2,}$/.test(t) ? t.charAt(0).toUpperCase() + t.slice(1) : ''; };
+function add(list) {
+  const have = new Set(S.contacts.map(c => c.phone)); let n = 0;
+  for (const c of list) { const phone = normPhone(c.phone); if (!phone || have.has(phone)) continue; have.add(phone); S.contacts.push({name: String(c.name || '').trim().slice(0, 80), phone, status: 'new'}); n++; }
+  save(); render(); return n;
+}
+function parseVcf(t) {
+  const out = []; for (const card of t.split(/BEGIN:VCARD/i).slice(1)) {
+    const un = card.replace(/\r?\n[ \t]/g, ''); let name = ((un.match(/^FN[^:]*:(.*)$/im) || [])[1] || '').trim();
+    if (!name) { const n = (un.match(/^N[^:]*:(.*)$/im) || [])[1]; if (n) { const p = n.split(';'); name = ((p[1] || '') + ' ' + (p[0] || '')).trim(); } }
+    const tels = [...un.matchAll(/^(?:item\d+\.)?TEL([^:]*):(.*)$/gim)].map(m => ({type: m[1].toUpperCase(), num: m[2].trim()}));
+    const pick = tels.find(x => /CELL|MOBILE|IPHONE/.test(x.type)) || tels[0]; if (pick) out.push({name, phone: pick.num});
+  } return out;
+}
+function parseLines(t) {
+  const out = []; for (const line of t.split(/\r?\n/)) {
+    const l = line.trim(); if (!l) continue; const m = l.match(/(\+?[\d][\d\s().-]{6,}\d)/); if (!m) continue;
+    const name = l.replace(m[1], '').replace(/[,;\t"]+/g, ' ').replace(/\s+/g, ' ').trim(); out.push({name, phone: m[1]});
+  } return out;
+}
+$('file').addEventListener('change', async e => {
+  const f = e.target.files[0]; if (!f) return; const t = await f.text();
+  const list = /BEGIN:VCARD/i.test(t) ? parseVcf(t) : parseLines(t);
+  $('importMsg').textContent = `Added ${add(list)} new contact(s) from ${f.name}.`; e.target.value = '';
+});
+$('addPaste').onclick = () => { const n = add(parseLines($('paste').value)); $('importMsg').textContent = `Added ${n} new contact(s).`; $('paste').value = ''; };
+$('clearAll').onclick = () => { if (!S.contacts.length) return; if ($('clearAll').dataset.arm) { S.contacts = []; S.log = []; save(); render(); $('clearAll').textContent = 'Clear all'; delete $('clearAll').dataset.arm; } else { $('clearAll').dataset.arm = 1; $('clearAll').textContent = 'Tap again to clear everything'; setTimeout(() => { $('clearAll').textContent = 'Clear all'; delete $('clearAll').dataset.arm; }, 4000); } };
+
+$('tpl').value = S.tpl; $('msg').value = S.msg;
+$('tpl').onchange = () => { S.tpl = $('tpl').value; S.msg = TPL[S.tpl]; $('msg').value = S.msg; save(); render(); };
+$('msg').oninput = () => { S.msg = $('msg').value; save(); render(); };
+
+const fill = c => S.msg.replace(/\{name\}/g, first(c.name) || 'there');
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const smsHref = c => 'sms:' + c.phone + (isIOS ? '&' : '?') + 'body=' + encodeURIComponent(fill(c));
+const today = () => new Date().toISOString().slice(0, 10);
+function mark(c, status) { c.status = status; S.log.push({t: new Date().toISOString(), name: c.name, phone: c.phone, status, template: S.tpl}); save(); render(); }
+
+function render() {
+  const cs = S.contacts, next = cs.find(c => c.status === 'new');
+  $('sTotal').textContent = cs.length; $('sLeft').textContent = cs.filter(c => c.status === 'new').length;
+  $('sSent').textContent = cs.filter(c => c.status === 'sent').length;
+  $('sToday').textContent = S.log.filter(l => l.status === 'sent' && l.t.slice(0, 10) === today()).length;
+  const h = new Date().getHours(); $('quiet').hidden = !(h >= 21 || h < 8);
+  $('card').hidden = !next; $('done').hidden = !!next || !cs.length;
+  if (next) { $('cName').textContent = next.name || 'No name'; $('cNum').textContent = next.phone; $('cPrev').textContent = fill(next); $('openSms').href = smsHref(next); $('card').dataset.phone = next.phone; }
+  const q = ($('q').value || '').toLowerCase(); const L = $('list'); L.textContent = '';
+  for (const c of cs.filter(c => !q || (c.name + c.phone).toLowerCase().includes(q)).slice(0, 400)) {
+    const d = document.createElement('div'); d.className = 'li';
+    const a = document.createElement('span'); a.textContent = (c.name || 'No name') + ' · ' + c.phone;
+    const p = document.createElement('span'); p.className = 'pill ' + ({sent: 'sent', optout: 'out', skip: 'skip'}[c.status] || '');
+    p.textContent = {new: 'to send', sent: 'sent', skip: 'skipped', optout: "don't text"}[c.status]; d.append(a, p); L.append(d);
+  }
+}
+const cur = () => S.contacts.find(c => c.phone === $('card').dataset.phone);
+$('markSent').onclick = () => { const c = cur(); if (c) mark(c, 'sent'); };
+$('skip').onclick = () => { const c = cur(); if (c) mark(c, 'skip'); };
+$('optout').onclick = () => { const c = cur(); if (c) mark(c, 'optout'); };
+$('resetSkips').onclick = () => { S.contacts.forEach(c => { if (c.status === 'skip') c.status = 'new'; }); save(); render(); };
+$('q').oninput = render;
+$('export').onclick = async () => {
+  const esc = v => '"' + String(v).replace(/"/g, '""') + '"';
+  const csv = ['time,name,phone,status,template'].concat(S.log.map(l => [l.t, l.name, l.phone, l.status, l.template].map(esc).join(','))).join('\n');
+  try { await navigator.clipboard.writeText(csv); $('exportMsg').textContent = `Copied ${S.log.length} log rows. Paste them into Notes or a spreadsheet.`; }
+  catch (e) { $('exportMsg').textContent = 'Copy is blocked here. Select and copy this instead:\n' + csv; }
+};
+render();
+})();
+</script>
+</body>
+</html>
