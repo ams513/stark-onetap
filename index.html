@@ -64,6 +64,7 @@ button:focus-visible,.btn:focus-visible,textarea:focus-visible,input:focus-visib
     <h2>2 · Message</h2>
     <label for="tpl">Template</label>
     <select id="tpl">
+      <option value="stark" selected>Stark: our message</option>
       <option value="earn">Earn with me (25% commission)</option>
       <option value="early">Early believers (interest only)</option>
       <option value="custom">My own message</option>
@@ -112,13 +113,14 @@ button:focus-visible,.btn:focus-visible,textarea:focus-visible,input:focus-visib
 (() => {
 'use strict';
 const TPL = {
-  earn: "Hi {name}, I wanted to share something I've been working on. I recently launched a software company, Protocol Stark. We make tools people buy once and keep, for clinics, contractors, schools and families.\n\nI'm looking for a few people to help spread the word. If someone buys through your link, you earn 25% of the sale. It's free to join and there's no obligation.\n\nIf you're interested, reply and I'll send you the details.",
-  early: "Hi {name}, I wanted to share something I've been working on. I recently launched a software company, Protocol Stark, and our products are now on sale worldwide.\n\nI'm in the process of forming it as a corporation. When that's done, I'll be offering a small number of people I know the chance to become early owners. There's nothing to decide now.\n\nIf you'd like to hear more when it's ready, just reply and I'll keep you posted.",
+  stark: "Hey {name}, I've been quietly building something and I'm finally ready to show people. It's my company, Stark:\n\nhttps://starkforall.com/share/\n\nIt started with something personal. I've watched people get hurt by scammers and debt collectors who count on them not knowing their rights. So the first thing I built was Warden. It lets you practise those calls before they happen, learn your rights in plain words, and send letters that make them back off.\n\nFrom there it grew. There are 14 products now: records software for therapists, a math tutor for kids, tools for teachers, an app for contractors to run their crews and subs, bookkeeping, and creative tools for writers and game makers. You buy once and own it. No subscriptions, and it works without internet, in English or Spanish.\n\nWhere this is all heading is something I call Apex Protocol. The idea is simple: protect people and communities everywhere, and respect the world we were given while we do it. Creation cultivated, Creator revered. It's early, but it's the reason behind everything else.\n\nTwo things, only if they feel right:\n\nIf you know anyone who could use any of this, I'll pay you up to 25% of every sale you send my way. Just say the word and I'll set you up with a link.\n\nAnd I'm turning Stark into a corporation. Once that's official, I'm planning to let a handful of people I know get in early as owners. Nothing to decide now. If you'd want to hear about it when the time comes, just tell me.\n\nEither way, I'd really love to know what you think. Everything's 30% off Nov 27 to Dec 1 if anything catches your eye.",
+  earn: "Hi {name}, I wanted to share something I've been working on. I recently launched a software company, Stark. We make tools people buy once and keep, for clinics, contractors, schools and families.\n\nI'm looking for a few people to help spread the word. If someone buys through your link, you earn 25% of the sale. It's free to join and there's no obligation.\n\nIf you're interested, reply and I'll send you the details.",
+  early: "Hi {name}, I wanted to share something I've been working on. I recently launched a software company, Stark, and our products are now on sale worldwide.\n\nI'm in the process of forming it as a corporation. When that's done, I'll be offering a small number of people I know the chance to become early owners. There's nothing to decide now.\n\nIf you'd like to hear more when it's ready, just reply and I'll keep you posted.",
   custom: "Hi {name}, "
 };
 const KEY = 'stark_onetap_v1';
 const $ = id => document.getElementById(id);
-let S = {contacts: [], tpl: 'earn', msg: TPL.earn, log: []};
+let S = {contacts: [], tpl: 'stark', msg: TPL.stark, log: []};
 try { const s = JSON.parse(localStorage.getItem(KEY) || 'null'); if (s && Array.isArray(s.contacts)) S = Object.assign(S, s); } catch (e) {}
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
 
