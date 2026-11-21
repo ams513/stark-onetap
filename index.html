@@ -65,9 +65,6 @@ button:focus-visible,.btn:focus-visible,textarea:focus-visible,input:focus-visib
     <label for="tpl">Template</label>
     <select id="tpl">
       <option value="stark" selected>Stark: our message</option>
-      <option value="earn">Earn with me (25% commission)</option>
-      <option value="early">Early believers (interest only)</option>
-      <option value="custom">My own message</option>
     </select>
     <label for="msg">Message ({name} becomes their first name)</label>
     <textarea id="msg" style="min-height:180px"></textarea>
@@ -121,7 +118,7 @@ const TPL = {
 const KEY = 'stark_onetap_v1';
 const $ = id => document.getElementById(id);
 let S = {contacts: [], tpl: 'stark', msg: TPL.stark, log: []};
-try { const s = JSON.parse(localStorage.getItem(KEY) || 'null'); if (s && Array.isArray(s.contacts)) S = Object.assign(S, s); } catch (e) {}
+try { const s = JSON.parse(localStorage.getItem(KEY) || 'null'); if (s && Array.isArray(s.contacts)) S = Object.assign(S, s); } catch (e) {} S.tpl = 'stark'; S.msg = TPL.stark;
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
 
 const normPhone = p => { let d = String(p || '').replace(/[^\d+]/g, ''); if (!d) return ''; if (d[0] !== '+') { d = d.replace(/\D/g, ''); if (d.length === 10) d = '+1' + d; else if (d.length === 11 && d[0] === '1') d = '+' + d; else d = '+' + d; } return d.length >= 8 ? d : ''; };
